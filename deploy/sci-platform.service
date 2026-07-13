@@ -9,7 +9,7 @@ Group=sci-platform
 WorkingDirectory=/opt/sci-platform
 Environment=SCI_HOST=127.0.0.1
 Environment=SCI_PORT=8000
-ExecStart=/usr/bin/python3 /opt/sci-platform/backend/server.py
+ExecStart=/usr/bin/python3.11 /opt/sci-platform/backend/server.py
 Restart=always
 RestartSec=3
 
