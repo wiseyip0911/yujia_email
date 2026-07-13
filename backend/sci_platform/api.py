@@ -107,16 +107,16 @@ class SciPlatformHandler(BaseHTTPRequestHandler):
                 self.send_json({"items": list_revision_jobs(conn)})
             elif method == "POST" and path.startswith("/api/revision-jobs/") and path.endswith("/handoff"):
                 task_id = self.extract_id(path, prefix="/api/revision-jobs/", suffix="/handoff")
-                self.send_json(handoff_revision_task(conn, task_id, self.read_json_body()))
+                self.send_json(handoff_revision_task(conn, task_id, self.actor_payload(self.read_json_body(), "reviewed_by")))
             elif method == "POST" and path.startswith("/api/revision-jobs/") and path.endswith("/manual-required"):
                 task_id = self.extract_id(path, prefix="/api/revision-jobs/", suffix="/manual-required")
-                self.send_json(mark_revision_manual_required(conn, task_id, self.read_json_body()))
+                self.send_json(mark_revision_manual_required(conn, task_id, self.actor_payload(self.read_json_body(), "reviewed_by")))
             elif method == "POST" and path.startswith("/api/review-tasks/") and path.endswith("/confirm"):
                 task_id = self.extract_id(path, prefix="/api/review-tasks/", suffix="/confirm")
-                self.send_json(confirm_review_task(conn, task_id, self.read_json_body()))
+                self.send_json(confirm_review_task(conn, task_id, self.actor_payload(self.read_json_body(), "confirmed_by")))
             elif method == "POST" and path.startswith("/api/review-tasks/") and path.endswith("/revise"):
                 task_id = self.extract_id(path, prefix="/api/review-tasks/", suffix="/revise")
-                self.send_json(request_review_task_revision(conn, task_id, self.read_json_body()))
+                self.send_json(request_review_task_revision(conn, task_id, self.actor_payload(self.read_json_body(), "reviewed_by")))
             elif method == "GET" and path == "/api/contexts":
                 self.send_json({"items": list_email_contexts(conn)})
             elif method == "GET" and path == "/api/search":
@@ -140,7 +140,8 @@ class SciPlatformHandler(BaseHTTPRequestHandler):
                 self.send_json({"items": list_sync_issues(conn)})
             elif method == "POST" and path == "/api/exports/kingdee-csv":
                 payload = self.read_json_body(optional=True)
-                self.send_json(create_kingdee_csv(conn, payload.get("operated_by", "业务审核员")))
+                actor = self.session_username() or payload.get("operated_by") or "系统用户"
+                self.send_json(create_kingdee_csv(conn, actor))
             elif method == "GET" and path == "/api/audit-logs":
                 self.send_json({"items": list_audit_logs(conn)})
             else:
@@ -172,6 +173,13 @@ class SciPlatformHandler(BaseHTTPRequestHandler):
         if not raw:
             return {}
         return json.loads(raw)
+
+    def actor_payload(self, payload: dict, actor_field: str) -> dict:
+        data = dict(payload or {})
+        username = self.session_username()
+        if username:
+            data[actor_field] = username
+        return data
 
     def send_json(self, payload: dict, status: int = HTTPStatus.OK, headers: Optional[dict[str, str]] = None) -> None:
         body = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")

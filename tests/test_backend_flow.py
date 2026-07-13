@@ -1,7 +1,10 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+from backend.sci_platform import api as api_module
+from backend.sci_platform.api import SciPlatformHandler
 from backend.sci_platform.mailbox_testing import FetchedEmail
 from backend.sci_platform.db import get_connection, initialize_database
 from backend.sci_platform.services import (
@@ -21,6 +24,14 @@ from backend.sci_platform.services import (
     search_workspace,
     store_fetched_emails,
 )
+
+
+class DummyConnection:
+    def __enter__(self):
+        return "conn"
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
 
 
 class BackendFlowTest(unittest.TestCase):
@@ -284,6 +295,40 @@ class BackendFlowTest(unittest.TestCase):
             account_notice = next(item for item in contexts if item["context_type"] == "account_notice")
             self.assertEqual(account_notice["project_code"], "P-100")
             self.assertEqual(account_notice["current_status"], "投稿账号通知")
+
+    def test_api_confirm_uses_logged_in_username_as_actor(self):
+        handler = object.__new__(SciPlatformHandler)
+        handler.session_username = lambda: "pangyanan"
+        handler.read_json_body = lambda optional=False: {"confirmed_by": "伪造操作人", "note": "确认"}
+        sent = []
+        handler.send_json = lambda payload, status=200, headers=None: sent.append(payload)
+
+        with (
+            patch.object(api_module, "initialize_database", lambda: None),
+            patch.object(api_module, "get_connection", lambda: DummyConnection()),
+            patch.object(api_module, "confirm_review_task", return_value={"ok": True}) as confirm,
+        ):
+            handler.handle_api("POST", "/api/review-tasks/7/confirm", {})
+
+        confirm.assert_called_once_with("conn", 7, {"confirmed_by": "pangyanan", "note": "确认"})
+        self.assertEqual(sent, [{"ok": True}])
+
+    def test_api_export_uses_logged_in_username_as_actor(self):
+        handler = object.__new__(SciPlatformHandler)
+        handler.session_username = lambda: "tanzhiyun"
+        handler.read_json_body = lambda optional=False: {"operated_by": "伪造操作人"}
+        sent = []
+        handler.send_json = lambda payload, status=200, headers=None: sent.append(payload)
+
+        with (
+            patch.object(api_module, "initialize_database", lambda: None),
+            patch.object(api_module, "get_connection", lambda: DummyConnection()),
+            patch.object(api_module, "create_kingdee_csv", return_value={"ok": True}) as export,
+        ):
+            handler.handle_api("POST", "/api/exports/kingdee-csv", {})
+
+        export.assert_called_once_with("conn", "tanzhiyun")
+        self.assertEqual(sent, [{"ok": True}])
 
 
 if __name__ == "__main__":

@@ -953,7 +953,7 @@ def confirm_review_task(conn, task_id: int, payload: dict[str, Any]) -> dict:
 
     extracted = json.loads(task["extracted_json"])
     confirmed = {**extracted, **(payload.get("fields") or {})}
-    actor = payload.get("confirmed_by") or "业务审核员"
+    actor = payload.get("confirmed_by") or "系统用户"
     next_status = confirmed.get("next_status")
     category = str(confirmed.get("category") or "").lower()
     if category == "revision" or next_status == "Revision Requested":
@@ -1052,7 +1052,7 @@ def mark_revision_manual_required(conn, task_id: int, payload: dict[str, Any]) -
     if task["category"] != "revision" and fields.get("next_status") != "Revision Requested":
         raise ValueError("only revision tasks can be handed off")
 
-    actor = payload.get("reviewed_by") or "业务审核员"
+    actor = payload.get("reviewed_by") or "系统用户"
     conn.execute(
         """
         UPDATE review_tasks
@@ -1096,7 +1096,7 @@ def request_review_task_revision(conn, task_id: int, payload: dict[str, Any]) ->
     if task["status"] != "pending":
         raise ValueError("review task has already been processed")
 
-    actor = payload.get("reviewed_by") or "业务审核员"
+    actor = payload.get("reviewed_by") or "系统用户"
     reason = payload.get("reason") or "选择待调整处理，需人工复核"
     conn.execute(
         """
@@ -1247,7 +1247,7 @@ def list_sync_issues(conn) -> list[dict]:
     ).fetchall()
 
 
-def create_kingdee_csv(conn, actor: str = "业务审核员") -> dict:
+def create_kingdee_csv(conn, actor: str = "系统用户") -> dict:
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
     mapping = conn.execute("SELECT * FROM kingdee_mappings WHERE is_active = 1 ORDER BY mapping_id DESC LIMIT 1").fetchone()
     batch_no = now_batch("kingdee")

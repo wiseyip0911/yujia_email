@@ -1,4 +1,5 @@
 const state = {
+  currentUser: "",
   tasks: [],
   contexts: [],
   manuscripts: [],
@@ -116,7 +117,8 @@ function displayTitle(value, fallback = "未匹配稿件") {
 }
 
 async function loadAll() {
-  const [dashboard, tasks, contexts, manuscripts, mailboxes, microsoftOAuth, daily, audit, revisionJobs, syncIssues] = await Promise.all([
+  const [auth, dashboard, tasks, contexts, manuscripts, mailboxes, microsoftOAuth, daily, audit, revisionJobs, syncIssues] = await Promise.all([
+    api("/api/auth/me"),
     api("/api/dashboard"),
     api("/api/review-tasks"),
     api("/api/contexts"),
@@ -128,6 +130,7 @@ async function loadAll() {
     api("/api/revision-jobs"),
     api("/api/sync-issues"),
   ]);
+  state.currentUser = auth.username || "";
   state.tasks = tasks.items;
   state.contexts = contexts.items;
   state.manuscripts = manuscripts.items;
@@ -137,6 +140,7 @@ async function loadAll() {
   state.auditLogs = audit.items;
   state.revisionJobs = revisionJobs.items;
   state.syncIssues = syncIssues.items;
+  renderCurrentUser();
   renderDashboard(dashboard);
   renderCommandCenter();
   renderSearchResults();
@@ -149,6 +153,17 @@ async function loadAll() {
   renderSyncIssues();
   renderDaily();
   renderAudit();
+}
+
+function currentActor() {
+  return state.currentUser || "当前用户";
+}
+
+function renderCurrentUser() {
+  const badge = $("#currentUserBadge");
+  if (badge) {
+    badge.textContent = state.currentUser ? `当前用户：${state.currentUser}` : "未登录";
+  }
 }
 
 function renderDashboard(data) {
@@ -1393,7 +1408,7 @@ async function handleFetchEmails() {
 async function handleExportKingdee() {
   const result = await api("/api/exports/kingdee-csv", {
     method: "POST",
-    body: JSON.stringify({ operated_by: "业务审核员" }),
+    body: JSON.stringify({ operated_by: currentActor() }),
   });
   showToast(`已生成金蝶 CSV：${result.batch_no}`);
   await loadAll();
@@ -1402,7 +1417,7 @@ async function handleExportKingdee() {
 async function handleConfirmTask(taskId) {
   const result = await api(`/api/review-tasks/${taskId}/confirm`, {
     method: "POST",
-    body: JSON.stringify({ confirmed_by: "业务审核员", note: "前端确认并更新状态" }),
+    body: JSON.stringify({ confirmed_by: currentActor(), note: "前端确认并更新状态" }),
   });
   closeModal();
   showToast(result.result === "no_action" ? "已确认无需处理" : `已更新稿件状态：${workflowStatusText(result.current_status)}`);
@@ -1413,7 +1428,7 @@ async function handleRevisionManualRequired(taskId) {
   const result = await api(`/api/revision-jobs/${taskId}/manual-required`, {
     method: "POST",
     body: JSON.stringify({
-      reviewed_by: "业务审核员",
+      reviewed_by: currentActor(),
       note: "功能尚未完成，需手动处理",
     }),
   });
@@ -1425,7 +1440,7 @@ async function handleRevisionManualRequired(taskId) {
 async function handleReviseTask(taskId) {
   await api(`/api/review-tasks/${taskId}/revise`, {
     method: "POST",
-    body: JSON.stringify({ reviewed_by: "业务审核员", reason: "选择待调整处理，需人工复核" }),
+    body: JSON.stringify({ reviewed_by: currentActor(), reason: "选择待调整处理，需人工复核" }),
   });
   closeModal();
   showToast("已标记为待调整");

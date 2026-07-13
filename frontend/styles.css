@@ -104,10 +104,23 @@ button.primary:hover {
 }
 
 .header-actions {
+  align-items: center;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.user-badge {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 13px;
+  min-height: 38px;
+  padding: 0 12px;
+  white-space: nowrap;
 }
 
 .layout {
