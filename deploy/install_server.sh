@@ -44,7 +44,7 @@ rm -rf "$APP_DIR/backend" "$APP_DIR/frontend"
 cp -a backend "$APP_DIR/"
 cp -a frontend "$APP_DIR/"
 cp -a README.md "$APP_DIR/"
-if [ -f data/sci_platform.sqlite3 ]; then
+if [ -f data/sci_platform.sqlite3 ] && [ ! -f "$APP_DIR/data/sci_platform.sqlite3" ]; then
   cp -a data/sci_platform.sqlite3 "$APP_DIR/data/"
 fi
 if [ -d data/exports ]; then
