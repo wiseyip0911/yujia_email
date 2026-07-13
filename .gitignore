@@ -1,0 +1,14 @@
+.DS_Store
+.env
+__pycache__/
+*.pyc
+.venv/
+data/*.sqlite3
+data/*.csv
+data/**/*.sqlite3
+data/**/*.csv
+data/**/*.json
+data/thunderbird-*/
+dist/
+node_modules/
+.doc_review/

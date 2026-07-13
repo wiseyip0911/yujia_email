@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SCI 投稿管理平台</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>SCI 投稿管理平台</h1>
+        <p id="headerStatus">正在读取今日运营状态</p>
+      </div>
+      <form id="globalSearchForm" class="global-search" role="search">
+        <input id="globalSearchInput" type="search" placeholder="搜索客户、作者、稿件号、邮件内容" autocomplete="off" />
+        <button class="primary" type="submit">搜索</button>
+      </form>
+      <div class="header-actions">
+        <button id="fetchEmailsBtn" class="primary" type="button">采集/识别邮件</button>
+        <button id="exportKingdeeBtn" type="button">生成金蝶 CSV</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="command-center" aria-label="工作台">
+        <section class="summary-grid" aria-label="重点数据">
+          <article class="metric priority">
+            <span>当前焦点</span>
+            <strong id="todoTotal">0</strong>
+            <small id="todoCaption">等待数据</small>
+          </article>
+          <article class="metric">
+            <span>需业务处理</span>
+            <strong id="handleCount">0</strong>
+            <small>确认后更新稿件状态</small>
+          </article>
+          <article class="metric">
+            <span>建议不处理</span>
+            <strong id="skipCount">0</strong>
+            <small>可快速确认归档</small>
+          </article>
+          <article class="metric">
+            <span>邮箱异常</span>
+            <strong id="mailboxIssueCount">0</strong>
+            <small>影响后续采集</small>
+          </article>
+        </section>
+
+        <section class="priority-layout">
+          <section class="panel priority-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>下一步处理</h2>
+                <p id="todoSummary">系统会把最值得先看的邮件放在这里</p>
+              </div>
+              <span id="pendingReview">0 待审核</span>
+            </div>
+            <div id="todoList" class="todo-list"></div>
+          </section>
+
+          <aside class="panel ops-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>系统状态</h2>
+                <p>接入和导出放在这里，不打断邮件判断</p>
+              </div>
+            </div>
+            <div id="opsSnapshot" class="ops-stack"></div>
+          </aside>
+        </section>
+      </section>
+
+      <section id="searchResultsPanel" class="search-results-panel hidden" aria-label="搜索结果"></section>
+
+      <section class="secondary-metrics" aria-label="数据概览">
+        <button class="mini-metric" data-metric-view="contexts" data-open-view="contexts" type="button">
+          <span>业务脉络</span>
+          <strong id="contextCount">0</strong>
+        </button>
+        <button class="mini-metric" data-metric-view="revision" data-open-view="revision" type="button">
+          <span>返修处理</span>
+          <strong id="revisionJobCount">0</strong>
+        </button>
+        <button class="mini-metric" data-metric-view="manuscripts" data-open-view="manuscripts" type="button">
+          <span>稿件档案</span>
+          <strong id="manuscriptCount">0</strong>
+        </button>
+        <button class="mini-metric" data-metric-view="reminders" data-open-view="reminders" type="button">
+          <span>开放提醒</span>
+          <strong id="openReminderCount">0</strong>
+        </button>
+        <button class="mini-metric" data-metric-view="sync" data-open-view="sync" type="button">
+          <span>同步异常</span>
+          <strong id="failedSyncCount">0</strong>
+        </button>
+        <button class="mini-metric" data-metric-view="mailboxes" data-open-view="mailboxes" type="button">
+          <span>邮箱总数</span>
+          <strong id="mailboxTotal">0</strong>
+        </button>
+      </section>
+
+      <section class="workspace">
+        <aside class="panel review-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>邮件判断队列</h2>
+              <p>先处理状态类，再清理非投稿类</p>
+            </div>
+            <span id="taskCount">0 项</span>
+          </div>
+          <div class="task-filter" role="tablist" aria-label="邮件任务筛选">
+            <button class="filter active" data-task-filter="pending" type="button">待判断</button>
+            <button class="filter" data-task-filter="handle" type="button">建议处理</button>
+            <button class="filter" data-task-filter="skip" type="button">建议不处理</button>
+            <button class="filter" data-task-filter="all" type="button">全部</button>
+          </div>
+          <div id="reviewTasks" class="task-list"></div>
+        </aside>
+
+        <section class="panel detail-panel">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-view="contexts" type="button">上下文</button>
+            <button class="tab" data-view="revision" type="button">返修</button>
+            <button class="tab" data-view="manuscripts" type="button">稿件</button>
+            <button class="tab" data-view="mailboxes" type="button">邮箱</button>
+            <button class="tab" data-view="reminders" type="button">提醒</button>
+            <button class="tab" data-view="sync" type="button">同步</button>
+            <button class="tab" data-view="daily" type="button">日报</button>
+            <button class="tab" data-view="audit" type="button">审计</button>
+          </div>
+
+          <div id="contextsView" class="view active">
+            <div class="panel-heading">
+              <div>
+                <h2>邮件上下文</h2>
+                <span>按稿件、项目、作者或会话串联邮件</span>
+              </div>
+            </div>
+            <div id="contexts" class="records"></div>
+          </div>
+
+          <div id="revisionView" class="view">
+            <div class="panel-heading">
+              <div>
+                <h2>返修处理队列</h2>
+                <span>要求修改稿件的邮件，当前需人工手动处理</span>
+              </div>
+            </div>
+            <div id="revisionJobs" class="records"></div>
+          </div>
+
+          <div id="manuscriptsView" class="view">
+            <div class="panel-heading">
+              <h2>稿件事件流</h2>
+              <span>状态由人工确认后更新</span>
+            </div>
+            <div id="manuscripts" class="records"></div>
+          </div>
+
+          <div id="mailboxesView" class="view">
+            <div class="panel-heading">
+              <h2>邮箱接入状态</h2>
+              <span>凭据不在前端展示</span>
+            </div>
+            <div id="mailboxes" class="records"></div>
+          </div>
+
+          <div id="remindersView" class="view">
+            <div class="panel-heading">
+              <h2>开放提醒</h2>
+              <span>返修、版面费、校样和截止事项</span>
+            </div>
+            <div id="openReminders" class="records"></div>
+          </div>
+
+          <div id="syncView" class="view">
+            <div class="panel-heading">
+              <h2>同步异常</h2>
+              <span>金蝶导出或后续同步失败记录</span>
+            </div>
+            <div id="syncIssues" class="records"></div>
+          </div>
+
+          <div id="dailyView" class="view">
+            <div class="panel-heading">
+              <h2>今日日报</h2>
+              <span>来自正式事件</span>
+            </div>
+            <div id="dailyReport" class="records"></div>
+          </div>
+
+          <div id="auditView" class="view">
+            <div class="panel-heading">
+              <h2>审计日志</h2>
+              <span>关键操作留痕</span>
+            </div>
+            <div id="auditLogs" class="records"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div id="modalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <section class="modal-panel">
+        <div class="modal-head">
+          <div>
+            <span id="modalKicker"></span>
+            <h2 id="modalTitle">详情</h2>
+          </div>
+          <button id="modalCloseBtn" type="button">关闭</button>
+        </div>
+        <div id="modalBody" class="modal-body"></div>
+        <div id="modalActions" class="modal-actions"></div>
+      </section>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
