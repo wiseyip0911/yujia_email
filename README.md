@@ -25,14 +25,14 @@ http://127.0.0.1:8000
 默认登录：
 
 ```text
-用户名：liaojunhua
+用户名：liaojunhua / pangyanan / tanzhiyun
 密码：666666
 ```
 
 生产环境可通过环境变量覆盖：
 
 ```bash
-export SCI_LOGIN_USERNAME="你的用户名"
+export SCI_LOGIN_USERNAMES="用户1,用户2"
 export SCI_LOGIN_PASSWORD="你的密码"
 ```
 

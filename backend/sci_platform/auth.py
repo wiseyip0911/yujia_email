@@ -7,7 +7,7 @@ import time
 from http.cookies import SimpleCookie
 from typing import Optional
 
-from .config import DATA_DIR, SCI_LOGIN_PASSWORD, SCI_LOGIN_USERNAME, SESSION_SECRET_PATH
+from .config import DATA_DIR, SCI_LOGIN_ACCOUNTS, SESSION_SECRET_PATH
 
 
 SESSION_COOKIE = "sci_session"
@@ -15,7 +15,8 @@ SESSION_TTL_SECONDS = 7 * 24 * 60 * 60
 
 
 def credentials_valid(username: str, password: str) -> bool:
-    return hmac.compare_digest(username or "", SCI_LOGIN_USERNAME) and hmac.compare_digest(password or "", SCI_LOGIN_PASSWORD)
+    expected_password = SCI_LOGIN_ACCOUNTS.get(username or "")
+    return bool(expected_password) and hmac.compare_digest(password or "", expected_password)
 
 
 def session_secret() -> bytes:
@@ -61,7 +62,7 @@ def verify_session_cookie(value: Optional[str], now: Optional[int] = None) -> Op
     if expires_at < current:
         return None
     username = str(payload.get("u") or "")
-    return username if username == SCI_LOGIN_USERNAME else None
+    return username if username in SCI_LOGIN_ACCOUNTS else None
 
 
 def cookie_value(cookie_header: Optional[str], name: str = SESSION_COOKIE) -> Optional[str]:

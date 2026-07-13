@@ -17,13 +17,15 @@ class AuthTests(unittest.TestCase):
 
     def test_credentials(self):
         self.assertTrue(auth.credentials_valid("liaojunhua", "666666"))
+        self.assertTrue(auth.credentials_valid("pangyanan", "666666"))
+        self.assertTrue(auth.credentials_valid("tanzhiyun", "666666"))
         self.assertFalse(auth.credentials_valid("liaojunhua", "bad-password"))
         self.assertFalse(auth.credentials_valid("other", "666666"))
 
     def test_signed_session_cookie(self):
-        token = auth.make_session_cookie("liaojunhua", now=100)
+        token = auth.make_session_cookie("pangyanan", now=100)
 
-        self.assertEqual(auth.verify_session_cookie(token, now=120), "liaojunhua")
+        self.assertEqual(auth.verify_session_cookie(token, now=120), "pangyanan")
         self.assertIsNone(auth.verify_session_cookie(token.replace(".", "x.", 1), now=120))
         self.assertIsNone(auth.verify_session_cookie(token, now=100 + auth.SESSION_TTL_SECONDS + 1))
 
