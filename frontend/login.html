@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RISE（Research Intelligent System Engine） SCI Bot</title>
+    <link rel="stylesheet" href="/login.css" />
+  </head>
+  <body class="login-body">
+    <main class="login-shell">
+      <section class="login-brand" aria-label="RISE SCI Bot">
+        <span>RISE</span>
+        <h1>RISE（Research Intelligent System Engine） SCI Bot</h1>
+      </section>
+
+      <section class="login-panel" aria-label="登录">
+        <div class="login-panel-head">
+          <span>SCI Bot</span>
+          <h2>登录系统</h2>
+        </div>
+        <form id="loginForm" class="login-form">
+          <label>
+            <span>用户名</span>
+            <input id="username" name="username" autocomplete="username" required />
+          </label>
+          <label>
+            <span>密码</span>
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <p id="loginError" class="login-error" role="alert"></p>
+          <button class="login-button" type="submit">登录</button>
+        </form>
+      </section>
+    </main>
+    <script src="/login.js"></script>
+  </body>
+</html>

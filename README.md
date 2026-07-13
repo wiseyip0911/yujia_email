@@ -22,6 +22,20 @@ python3 backend/server.py
 http://127.0.0.1:8000
 ```
 
+默认登录：
+
+```text
+用户名：liaojunhua
+密码：666666
+```
+
+生产环境可通过环境变量覆盖：
+
+```bash
+export SCI_LOGIN_USERNAME="你的用户名"
+export SCI_LOGIN_PASSWORD="你的密码"
+```
+
 默认数据库文件：
 
 ```text

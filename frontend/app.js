@@ -22,6 +22,10 @@ async function api(path, options = {}) {
     ...options,
   });
   const payload = await response.json();
+  if (response.status === 401) {
+    window.location.href = "/login";
+    throw new Error(payload.error || "请先登录");
+  }
   if (!response.ok) {
     throw new Error(payload.error || "请求失败");
   }
@@ -1437,9 +1441,15 @@ async function handleMicrosoftOAuth(mailboxId) {
   showToast("已打开 Microsoft 授权页面");
 }
 
+async function handleLogout() {
+  await api("/api/auth/logout", { method: "POST", body: "{}" });
+  window.location.href = "/login";
+}
+
 function bindEvents() {
   $("#fetchEmailsBtn").addEventListener("click", () => handleFetchEmails().catch((error) => showToast(error.message)));
   $("#exportKingdeeBtn").addEventListener("click", () => handleExportKingdee().catch((error) => showToast(error.message)));
+  $("#logoutBtn").addEventListener("click", () => handleLogout().catch((error) => showToast(error.message)));
   $("#globalSearchForm").addEventListener("submit", (event) => handleSearch(event).catch((error) => showToast(error.message)));
   $("#modalBackdrop").addEventListener("click", (event) => {
     if (event.target.id === "modalBackdrop") {

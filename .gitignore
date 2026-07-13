@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 data/*.sqlite3
 data/*.csv
+data/session_secret
 data/**/*.sqlite3
 data/**/*.csv
 data/**/*.json

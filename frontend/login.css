@@ -1,0 +1,157 @@
+:root {
+  --ink: #eef8f1;
+  --muted: #b9d4c6;
+  --panel: rgba(8, 31, 25, 0.78);
+  --line: rgba(183, 231, 205, 0.22);
+  --green: #66d98c;
+  --green-dark: #123c2f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--ink);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+}
+
+.login-body {
+  background:
+    linear-gradient(90deg, rgba(4, 20, 17, 0.12), rgba(3, 18, 16, 0.6) 55%, rgba(3, 17, 15, 0.86)),
+    url("/assets/rise-login-bg.png") center / cover no-repeat fixed;
+}
+
+.login-shell {
+  align-items: center;
+  display: grid;
+  gap: 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+  min-height: 100vh;
+  padding: 48px clamp(22px, 5vw, 76px);
+}
+
+.login-brand {
+  align-self: end;
+  max-width: 760px;
+  padding-bottom: 7vh;
+}
+
+.login-brand span {
+  border: 1px solid rgba(160, 229, 190, 0.34);
+  color: #b9ffd0;
+  display: inline-flex;
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 1;
+  padding: 8px 10px;
+}
+
+.login-brand h1 {
+  font-size: clamp(34px, 5vw, 68px);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 18px 0 0;
+  max-width: 880px;
+  text-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+.login-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
+  padding: 28px;
+}
+
+.login-panel-head span {
+  color: var(--green);
+  display: block;
+  font-size: 13px;
+  margin-bottom: 9px;
+}
+
+.login-panel-head h2 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0 0 22px;
+}
+
+.login-form {
+  display: grid;
+  gap: 15px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.login-form label span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.login-form input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(183, 231, 205, 0.24);
+  border-radius: 6px;
+  color: var(--ink);
+  font: inherit;
+  min-height: 44px;
+  outline: none;
+  padding: 10px 12px;
+}
+
+.login-form input:focus {
+  border-color: rgba(102, 217, 140, 0.82);
+  box-shadow: 0 0 0 3px rgba(102, 217, 140, 0.14);
+}
+
+.login-error {
+  color: #ffd6d6;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+  min-height: 18px;
+}
+
+.login-button {
+  background: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 6px;
+  color: #062116;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  min-height: 46px;
+  padding: 10px 14px;
+}
+
+.login-button:disabled {
+  cursor: progress;
+  opacity: 0.72;
+}
+
+@media (max-width: 820px) {
+  .login-shell {
+    align-content: end;
+    grid-template-columns: 1fr;
+  }
+
+  .login-brand {
+    align-self: auto;
+    padding-bottom: 0;
+  }
+
+  .login-brand h1 {
+    font-size: 34px;
+  }
+}
